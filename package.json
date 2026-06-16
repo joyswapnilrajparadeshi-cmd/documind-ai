@@ -1,0 +1,31 @@
+{
+  "name": "documind-ai",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "DocuMind AI - AI Document Intelligence Workspace",
+  "scripts": {
+    "dev": "concurrently \"vite --host 0.0.0.0 --port 5173\" \"node --watch server/index.js\"",
+    "build": "vite build",
+    "start": "node server/index.js",
+    "server": "node server/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "latest",
+    "@vitejs/plugin-react": "latest",
+    "concurrently": "latest",
+    "cors": "latest",
+    "dotenv": "latest",
+    "express": "latest",
+    "mammoth": "latest",
+    "multer": "latest",
+    "openai": "latest",
+    "pdf-parse": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "vite": "latest"
+  }
+}

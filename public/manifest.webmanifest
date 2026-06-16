@@ -1,0 +1,18 @@
+{
+  "name": "DocuMind AI",
+  "short_name": "DocuMind",
+  "description": "AI document intelligence workspace for summaries, Q&A, tasks, risks, notes, reports, and saved workspaces.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07111f",
+  "theme_color": "#08111f",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
