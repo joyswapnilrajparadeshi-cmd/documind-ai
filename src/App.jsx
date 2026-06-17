@@ -66,7 +66,13 @@ async function api(path, options = {}, token = '') {
 
   let response;
   try {
-    response = await fetch(path, { ...options, headers });
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
+    const isNativeApp = window.location.protocol === 'capacitor:';
+    const apiPath = path.startsWith('/api')
+      ? `${apiBaseUrl || (isNativeApp ? 'https://documind-ai-knq5.onrender.com' : '')}${path}`
+      : path;
+
+    response = await fetch(apiPath, { ...options, headers });
   } catch (error) {
     throw new Error(getFriendlyError(error));
   }
