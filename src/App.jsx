@@ -549,12 +549,89 @@ export default function App() {
     }
   }
 
-  function exportPdf() {
+  async function exportPdf() {
     if (!hasOutput) {
       setMessage({ type: 'error', text: 'Generate an output before exporting a PDF report.' });
       return;
     }
-    window.print();
+
+    const isNativeApp =
+      window.location.protocol === 'capacitor:' ||
+      Boolean(window.Capacitor?.isNativePlatform?.());
+
+    if (!isNativeApp) {
+      window.print();
+      return;
+    }
+
+    try {
+      setMessage({ type: 'info', text: 'Preparing PDF export...' });
+
+      const [{ jsPDF }, { Filesystem, Directory }, { Share }] = await Promise.all([
+        import('jspdf'),
+        import('@capacitor/filesystem'),
+        import('@capacitor/share')
+      ]);
+
+      const reportElement = document.querySelector('.printable-report');
+      const reportText = reportElement?.innerText || 'DocuMind AI Report';
+
+      const pdf = new jsPDF({ unit: 'pt', format: 'a4' });
+      const margin = 40;
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const maxWidth = pageWidth - margin * 2;
+      let y = margin;
+
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(18);
+      pdf.text('DocuMind AI Report', margin, y);
+      y += 28;
+
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(10);
+      pdf.text(`Generated: ${new Date().toLocaleString()}`, margin, y);
+      y += 26;
+
+      pdf.setFontSize(11);
+      const lines = pdf.splitTextToSize(reportText, maxWidth);
+
+      for (const line of lines) {
+        if (y > pageHeight - margin) {
+          pdf.addPage();
+          y = margin;
+        }
+        pdf.text(line, margin, y);
+        y += 15;
+      }
+
+      const fileName = `DocuMind-AI-Report-${new Date().toISOString().slice(0, 10)}.pdf`;
+      const base64Data = pdf.output('datauristring').split(',')[1];
+
+      const savedFile = await Filesystem.writeFile({
+        path: fileName,
+        data: base64Data,
+        directory: Directory.Cache
+      });
+
+      const fileUri =
+        savedFile.uri ||
+        (await Filesystem.getUri({ path: fileName, directory: Directory.Cache })).uri;
+
+      await Share.share({
+        title: 'DocuMind AI Report',
+        text: 'DocuMind AI PDF report',
+        url: fileUri,
+        dialogTitle: 'Share PDF Report'
+      });
+
+      setMessage({ type: 'success', text: 'PDF export ready. Choose where to save or share it.' });
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text: `PDF export failed: ${error.message || 'Please try again.'}`
+      });
+    }
   }
 
   const currentOutput = outputs[activeOutput]?.result;
